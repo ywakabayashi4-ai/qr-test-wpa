@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <script src="core.js"></script>
-<script src="sha256.js"></script>
-<script src="aes.js"></script>
-<script src="enc-base64.js"></script>
   <meta charset="UTF-8">
   <title>QR復号ツール</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2196f3">
   <link rel="manifest" href="manifest.json">
+  <script src="core.js"></script>
+  <script src="sha256.js"></script>
+  <script src="aes.js"></script>
+  <script src="enc-base64.js"></script>
+  <script src="html5-qrcode.min.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
@@ -31,7 +32,6 @@
   <button onclick="decrypt()">復号する</button>
   <div id="result">QRコードを読み取ってください。</div>
 
-  <script src="html5-qrcode.min.js"></script>
   <script>
     let encryptedText = "";
 
@@ -54,7 +54,7 @@
         const iv = CryptoJS.lib.WordArray.create(encryptedBytes.words.slice(0, 4));
         const ciphertext = CryptoJS.lib.WordArray.create(encryptedBytes.words.slice(4));
         const key = CryptoJS.SHA256(password);
-        const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext }, key, { iv: iv });
+        const decrypted = CryptoJS.AES.decrypt({ ciphertext }, key, { iv });
         const plainText = decrypted.toString(CryptoJS.enc.Utf8);
         document.getElementById("result").textContent = plainText || "復号に失敗しました。パスワードが正しいか確認してください。";
       } catch (e) {
@@ -64,6 +64,3 @@
   </script>
 </body>
 </html>
-
-
-
