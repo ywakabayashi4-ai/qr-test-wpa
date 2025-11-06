@@ -18,6 +18,10 @@
         .catch(err => console.error("Service Worker registration failed:", err));
     }
   </script>
+  <script>
+  console.log("CryptoJS.AES:", typeof CryptoJS.AES); // "object" ならOK、"undefined" ならNG
+</script>
+
   <style>
     body { font-family: sans-serif; padding: 1em; background: #f5f5f5; }
     #reader { width: 300px; margin-bottom: 1em; }
@@ -83,3 +87,4 @@
   </script>
 </body>
 </html>
+
