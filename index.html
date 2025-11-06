@@ -35,32 +35,51 @@
   <script>
     let encryptedText = "";
 
-    // QRコード読み取り
     const qr = new Html5Qrcode("reader");
     qr.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
       (decodedText) => {
         encryptedText = decodedText;
-        document.getElementById("result").textContent = "QR読み取り成功。パスワードを入力して復号してください。";
+        document.getElementById("result").textContent = "読み取り成功。パスワードを入力して復号してください。";
         qr.stop();
       },
       (errorMessage) => {}
     );
 
-    // 復号処理
     function decrypt() {
       const password = document.getElementById("password").value;
       try {
-        const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedText);
-        const iv = CryptoJS.lib.WordArray.create(encryptedBytes.words.slice(0, 4));
-        const ciphertext = CryptoJS.lib.WordArray.create(encryptedBytes.words.slice(4));
-        const key = CryptoJS.SHA256(password);
-        const decrypted = CryptoJS.AES.decrypt({ ciphertext }, key, { iv });
-        const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+        const data = window.Base64Parser.parse(encryptedText);
+        const iv = data.iv;
+        const ciphertext = data.ciphertext;
+        const key = window.HashFunction(password);
+        const decrypted = window.AESDecrypt(ciphertext, key, iv);
+        const plainText = decrypted.toString(window.Utf8);
         document.getElementById("result").textContent = plainText || "復号に失敗しました。パスワードが正しいか確認してください。";
       } catch (e) {
         document.getElementById("result").textContent = "復号エラー：" + e.message;
       }
     }
+
+    // ライブラリの関数を抽象化（CryptoJSという名前を隠す）
+    window.Base64Parser = {
+      parse: function (b64) {
+        const raw = CryptoJS.enc.Base64.parse(b64);
+        return {
+          iv: CryptoJS.lib.WordArray.create(raw.words.slice(0, 4)),
+          ciphertext: CryptoJS.lib.WordArray.create(raw.words.slice(4))
+        };
+      }
+    };
+
+    window.HashFunction = function (text) {
+      return CryptoJS.SHA256(text);
+    };
+
+    window.AESDecrypt = function (ciphertext, key, iv) {
+      return CryptoJS.AES.decrypt({ ciphertext }, key, { iv });
+    };
+
+    window.Utf8 = CryptoJS.enc.Utf8;
   </script>
 </body>
 </html>
